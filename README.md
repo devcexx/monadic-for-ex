@@ -4,17 +4,17 @@ Scala-style monadic for...yield structure for Elixir.
 
 Scala:
 ``` scala
-def safeDivision(x: Int, y: Int): Try[Int] = {
-  if (y != 0) Success(x / y)
+def divide(x: Int, y: Int): Try[(Int, Int)] = {
+  if (y != 0) Success((x / y, x % y))
   else Failure(new ArithmeticException("Cannot divide by zero!"))
 }
 
 def doMyStuff = {
   for {
-    x <- safeDivision(10, 2)
-    y <- safeDivision(x, 0)
-    z <- safeDivision(y, 8)
-  } yield x + y + z
+    (div1, _) <- divide(10, 2)
+    (_, rem2) <- divide(div1, 0)
+    z <- divide(rem2, 8)
+  } yield (div1, rem2, z)
 }
 ```
 
@@ -24,18 +24,18 @@ defmodule Test do
   import Try
   import MonadicFor
   
-  def safe_division(x, y) do
-    if y != 0, do: success(x / y),
+  def division(x, y) do
+    if y != 0, do: success({div(x, y), rem(x, y)}),
       else: failure("Cannot divide by zero!")
   end
 
   def do_my_stuff do
     ffor do
-      x <- safe_division(10, 2)
-      y <- safe_division(x, 0)
-      z <- safe_division(y, 8)
+      {div1, _} <- division(10, 2)
+      {_, rem2} <- division(div1, 0)
+      z <- division(rem2, 8)
     after
-      x + y + z
+      {div1, rem2, z}
     end
   end
 end
